@@ -1,11 +1,11 @@
 sudo: required
 
+language: bash
+
 services:
   - docker
 
-install: true
-
-before_deploy:
+install:
   - docker build . -t joshwyant/gcc-cross
 
 deploy:
