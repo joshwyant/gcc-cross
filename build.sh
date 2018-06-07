@@ -5,7 +5,7 @@ set -e
 
 # install prerequisites
 apt-get update
-apt-get install -y curl nasm build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo libcloog-isl-dev libisl-dev
+apt-get install -y curl nasm build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo
 
 # download and extract sources
 mkdir ~/src && cd ~/src
