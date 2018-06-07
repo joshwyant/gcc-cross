@@ -3,6 +3,8 @@ sudo: required
 services:
   - docker
 
+install: true
+
 before_deploy:
   - docker build . -t joshwyant/gcc-cross
 
