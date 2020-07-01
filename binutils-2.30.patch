@@ -1,0 +1,127 @@
+diff -ruN binutils-2.30/bfd/config.bfd binutils-2.30-1/bfd/config.bfd
+--- binutils-2.30/bfd/config.bfd	2018-01-13 13:31:15.000000000 +0000
++++ binutils-2.30-1/bfd/config.bfd	2020-06-30 06:53:35.670640000 +0000
+@@ -1868,6 +1868,18 @@
+     targ_defvec=m68k_coff_vec
+     targ_selvecs=ieee_vec
+     ;;
++  i[3-7]86-*-{{OSNAME}}*)
++    targ_defvec=i386_elf32_vec
++    targ_selvecs=
++    targ64_selvecs=x86_64_elf64_vec
++    ;;
++#ifdef BFD64
++  x86_64-*-{{OSNAME}}*)
++    targ_defvec=x86_64_elf64_vec
++    targ_selvecs=i386_elf32_vec
++    want64=true
++    ;;
++#endif
+ # END OF targmatch.h
+   *)
+     echo 1>&2 "*** BFD does not support target ${targ}."
+diff -ruN binutils-2.30/config.sub binutils-2.30-1/config.sub
+--- binutils-2.30/config.sub	2018-01-13 13:31:15.000000000 +0000
++++ binutils-2.30-1/config.sub	2020-06-30 06:50:15.575591000 +0000
+@@ -1416,7 +1416,8 @@
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+-	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* | -bme*)
++	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* | -bme* \
++	      | -{{OSNAME}}*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -ruN binutils-2.30/gas/configure.tgt binutils-2.30-1/gas/configure.tgt
+--- binutils-2.30/gas/configure.tgt	2018-01-13 13:31:15.000000000 +0000
++++ binutils-2.30-1/gas/configure.tgt	2020-06-30 06:57:14.495738000 +0000
+@@ -291,6 +291,7 @@
+   i386-*-chaos)				fmt=elf ;;
+   i386-*-rdos*)				fmt=elf ;;
+   i386-*-darwin*)			fmt=macho ;;
++  i386-*-{{OSNAME}}*)			fmt=elf ;;
+ 
+   i860-*-*)				fmt=elf endian=little ;;
+ 
+diff -ruN binutils-2.30/ld/Makefile.am binutils-2.30-1/ld/Makefile.am
+--- binutils-2.30/ld/Makefile.am	2018-01-13 13:31:16.000000000 +0000
++++ binutils-2.30-1/ld/Makefile.am	2020-06-30 07:15:42.440197000 +0000
+@@ -288,6 +288,7 @@
+ 	eelf32xstormy16.c \
+ 	eelf32xtensa.c \
+ 	eelf_i386.c \
++	eelf_i386_{{OSNAME}}.c \
+ 	eelf_i386_be.c \
+ 	eelf_i386_chaos.c \
+ 	eelf_i386_fbsd.c \
+@@ -506,6 +507,7 @@
+ 	eelf_k1om.c \
+ 	eelf_k1om_fbsd.c \
+ 	eelf_x86_64.c \
++	eelf_x86_64_{{OSNAME}}.c \
+ 	eelf_x86_64_cloudabi.c \
+ 	eelf_x86_64_fbsd.c \
+ 	eelf_x86_64_nacl.c \
+@@ -1344,6 +1346,10 @@
+ eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf_i386_{{OSNAME}}.c: $(srcdir)/emulparams/elf_i386_{{OSNAME}}.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++       ${GENSCRIPTS} elf_i386_{{OSNAME}} "$(tdir_elf_i386_{{OSNAME}})"
++
+ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
+@@ -2051,6 +2057,10 @@
+ eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf_x86_64_{{OSNAME}}.c: $(srcdir)/emulparams/elf_x86_64_{{OSNAME}}.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++       ${GENSCRIPTS} elf_x86_64_{{OSNAME}} "$(tdir_elf_x86_64_{{OSNAME}})"
++
+ eelf_x86_64_cloudabi.c: $(srcdir)/emulparams/elf_x86_64_cloudabi.sh \
+   $(srcdir)/emulparams/elf_x86_64.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+diff -ruN binutils-2.30/ld/configure.tgt binutils-2.30-1/ld/configure.tgt
+--- binutils-2.30/ld/configure.tgt	2018-01-13 13:31:16.000000000 +0000
++++ binutils-2.30-1/ld/configure.tgt	2020-06-30 22:18:33.750692000 +0000
+@@ -271,6 +271,11 @@
+ 			targ64_extra_emuls="elf_x86_64 elf32_x86_64 elf_l1om elf_k1om"
+ 			targ64_extra_libpath="elf_x86_64 elf32_x86_64"
+ 			tdir_i386linux=${targ_alias}aout ;;
++i[3-7]86-*-{{OSNAME}}*)	targ_emul=elf_i386_{{OSNAME}}
++			targ_extra_emuls=elf_i386
++			targ64_extra_emuls="elf_x86_64_{{OSNAME}} elf_x86_64" ;;
++x86_64-*-{{OSNAME}}*)	targ_emul=elf_x86_64_{{OSNAME}}
++			targ_extra_emuls="elf_i386_{{OSNAME}} elf_x86_64 elf_i386" ;;
+ x86_64-*-linux-gnux32)	targ_emul=elf32_x86_64
+ 			targ_extra_emuls="elf_x86_64 elf_i386 elf_iamcu i386linux elf_l1om elf_k1om"
+ 			targ_extra_libpath="elf_i386 elf_iamcu elf_x86_64 elf_l1om elf_k1om"
+@@ -942,6 +947,10 @@
+   NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+   ;;
+ 
++*-*-{{OSNAME}}*)
++  NATIVE_LIB_DIRS='/usr/lib /usr/local/cross/{{MACHINE}}-{{OSNAME}}/lib'
++  ;;
++
+ esac
+ 
+ case "${target}" in
+diff -ruN binutils-2.30/ld/emulparams/elf_i386_{{OSNAME}}.sh binutils-2.30-1/ld/emulparams/elf_i386_{{OSNAME}}.sh
+--- binutils-2.30/ld/emulparams/elf_i386_{{OSNAME}}.sh	1970-01-01 00:00:00.000000000 +0000
++++ binutils-2.30-1/ld/emulparams/elf_i386_{{OSNAME}}.sh	2020-06-30 07:03:09.061376000 +0000
+@@ -0,0 +1,4 @@
++. ${srcdir}/emulparams/elf_i386.sh
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
++
+diff -ruN binutils-2.30/ld/emulparams/elf_x86_64_{{OSNAME}}.sh binutils-2.30-1/ld/emulparams/elf_x86_64_{{OSNAME}}.sh
+--- binutils-2.30/ld/emulparams/elf_x86_64_{{OSNAME}}.sh	1970-01-01 00:00:00.000000000 +0000
++++ binutils-2.30-1/ld/emulparams/elf_x86_64_{{OSNAME}}.sh	2020-06-30 07:05:34.794683000 +0000
+@@ -0,0 +1,2 @@
++. ${srcdir}/emulparams/elf_x86_64.sh
++

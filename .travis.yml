@@ -6,7 +6,7 @@ services:
   - docker
 
 install:
-  - docker build . -t joshwyant/gcc-cross
+  - docker build . -t joshwyant/gcc-myos
 
 deploy:
   provider: script

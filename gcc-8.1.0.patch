@@ -1,0 +1,126 @@
+diff -ruN gcc-8.1.0/config.sub gcc-8.1.0-1/config.sub
+--- gcc-8.1.0/config.sub	2018-01-03 04:25:18.000000000 +0000
++++ gcc-8.1.0-1/config.sub	2020-06-30 21:49:49.285846000 +0000
+@@ -1416,7 +1416,7 @@
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+-	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* | -bme*)
++	      | -onefs* | -tirtos* | -phoenix* | -fuchsia* | -redox* | -bme* | -{{OSNAME}}*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -ruN gcc-8.1.0/fixincludes/mkfixinc.sh gcc-8.1.0-1/fixincludes/mkfixinc.sh
+--- gcc-8.1.0/fixincludes/mkfixinc.sh	2016-06-21 21:57:20.000000000 +0000
++++ gcc-8.1.0-1/fixincludes/mkfixinc.sh	2020-06-30 22:10:08.031773000 +0000
+@@ -11,6 +11,7 @@
+ 
+ # Check for special fix rules for particular targets
+ case $machine in
++    *-{{OSNAME}}* | \
+     i?86-*-cygwin* | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+diff -ruN gcc-8.1.0/gcc/config/{{OSNAME}}.h gcc-8.1.0-1/gcc/config/{{OSNAME}}.h
+--- gcc-8.1.0/gcc/config/{{OSNAME}}.h	1970-01-01 00:00:00.000000000 +0000
++++ gcc-8.1.0-1/gcc/config/{{OSNAME}}.h	2020-06-30 22:21:59.202525000 +0000
+@@ -0,0 +1,35 @@
++/* Useful if you wish to make target-specific GCC changes. */
++#undef TARGET_{{OSNAME_UPPER}}
++#define TARGET_{{OSNAME_UPPER}} 1
++ 
++/* Default arguments you want when running your
++   i686-{{OSNAME}}-gcc/x86_64-{{OSNAME}}-gcc toolchain */
++#undef LIB_SPEC
++#define LIB_SPEC "-lc" /* link against C standard library */
++ 
++/* Files that are linked before user code.
++   The %s tells GCC to look for these files in the library directory. */
++#undef STARTFILE_SPEC
++#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
++ 
++/* Files that are linked after user code. */
++#undef ENDFILE_SPEC
++#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
++ 
++/* Additional predefined macros. */
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()      \
++  do {                                \
++    builtin_define ("__{{OSNAME}}__");      \
++    builtin_define ("__unix__");      \
++    builtin_assert ("system={{OSNAME}}");   \
++    builtin_assert ("system=unix");   \
++    builtin_assert ("system=posix");   \
++  } while(0);
++
++#undef STANDARD_STARTFILE_PREFIX
++#define STANDARD_STARTFILE_PREFIX "/usr/local/cross/{{MACHINE}}-{{OSNAME}}/lib/"
++
++#undef LINK_SPEC
++#define LINK_SPEC "%{shared:-shared} %{static:-static} %{!shared: %{!static: %{rdynamic:-export-dynamic}}}"
++
+diff -ruN gcc-8.1.0/gcc/config.gcc gcc-8.1.0-1/gcc/config.gcc
+--- gcc-8.1.0/gcc/config.gcc	2018-04-27 19:31:35.000000000 +0000
++++ gcc-8.1.0-1/gcc/config.gcc	2020-06-30 22:15:02.711599000 +0000
+@@ -646,6 +646,13 @@
+ 
+ # Common parts for widely ported systems.
+ case ${target} in
++*-*-{{OSNAME}}*)
++  gas=yes
++  gnu_ld=yes
++  default_use_cxa_atexit=yes
++  use_gcc_stdint=wrap
++  native_system_header_dir"/usr/local/cross/${cpu_type}-{{OSNAME}}/include"
++  ;;
+ *-*-darwin*)
+   tmake_file="t-darwin ${cpu_type}/t-darwin"
+   tm_file="${tm_file} darwin.h"
+@@ -938,6 +945,12 @@
+ esac
+ 
+ case ${target} in
++i[34567]86-*-{{OSNAME}}*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h {{OSNAME}}.h"
++    ;;
++x86_64-*-{{OSNAME}}*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h {{OSNAME}}.h"
++    ;;
+ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+ 	tm_file="${tm_file} dbxelf.h elfos.h newlib-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-elf-raw.h"
+diff -ruN gcc-8.1.0/libgcc/config.host gcc-8.1.0-1/libgcc/config.host
+--- gcc-8.1.0/libgcc/config.host	2018-04-06 20:04:17.000000000 +0000
++++ gcc-8.1.0-1/libgcc/config.host	2020-06-30 22:06:42.970196000 +0000
+@@ -333,6 +333,14 @@
+ esac
+ 
+ case ${host} in
++i[34567]86-*-{{OSNAME}}*)
++	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
++x86_64-*-{{OSNAME}}*)
++	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ aarch64*-*-elf | aarch64*-*-rtems*)
+ 	extra_parts="$extra_parts crtbegin.o crtend.o crti.o crtn.o"
+ 	extra_parts="$extra_parts crtfastmath.o"
+diff -ruN gcc-8.1.0/libstdc++-v3/crossconfig.m4 gcc-8.1.0-1/libstdc++-v3/crossconfig.m4
+--- gcc-8.1.0/libstdc++-v3/crossconfig.m4	2018-03-12 22:52:16.000000000 +0000
++++ gcc-8.1.0-1/libstdc++-v3/crossconfig.m4	2020-06-30 22:05:16.267532000 +0000
+@@ -5,6 +5,12 @@
+ AC_DEFUN([GLIBCXX_CROSSCONFIG],[
+ # Base decisions on target environment.
+ case "${host}" in
++  *-{{OSNAME}}*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
+   arm*-*-symbianelf*)
+     # This is a freestanding configuration; there is nothing to do here.
+     ;;

@@ -1,0 +1,36 @@
+diff -ruN newlib-2.5.0/config.sub newlib-2.5.0-1/config.sub
+--- newlib-2.5.0/config.sub	2016-12-23 02:33:54.000000000 +0000
++++ newlib-2.5.0-1/config.sub	2020-06-22 18:48:44.320897109 +0000
+@@ -1399,7 +1399,7 @@
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+-	      | -onefs* | -tirtos* | -phoenix*)
++	      | -onefs* | -tirtos* | -phoenix* | -{{OSNAME}}*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -ruN newlib-2.5.0/newlib/configure.host newlib-2.5.0-1/newlib/configure.host
+--- newlib-2.5.0/newlib/configure.host	2016-12-23 02:33:54.000000000 +0000
++++ newlib-2.5.0-1/newlib/configure.host	2020-06-22 18:50:40.690503512 +0000
+@@ -240,6 +240,9 @@
+   mt*)
+ 	machine_dir=mt
+ 	;;
++  {{MACHINE}}-*-{{OSNAME}}*)
++	sys_dir={{OSNAME}}
++	;;
+   nds32*)
+ 	machine_dir=nds32
+ 	libm_machine_dir=nds32
+diff -ruN newlib-2.5.0/newlib/libc/sys/configure.in newlib-2.5.0-1/newlib/libc/sys/configure.in
+--- newlib-2.5.0/newlib/libc/sys/configure.in	2016-12-23 02:33:54.000000000 +0000
++++ newlib-2.5.0-1/newlib/libc/sys/configure.in	2020-06-22 18:51:18.559026067 +0000
+@@ -49,6 +49,7 @@
+ 	tirtos) AC_CONFIG_SUBDIRS(tirtos) ;;
+ 	w65) AC_CONFIG_SUBDIRS(w65) ;;
+ 	z8ksim) AC_CONFIG_SUBDIRS(z8ksim) ;;
++	{{OSNAME}}) AC_CONFIG_SUBDIRS({{OSNAME}}) ;;
+   esac;
+ fi
+ 
