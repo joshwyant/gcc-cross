@@ -6,7 +6,7 @@ export OS_NAME="myos"
 export BINUTILS_VERSION=2.34
 export GCC_VERSION=10.1.0
 export AUTOMAKE_VERSION=1.11
-export AUTOCONF_VERSION=2.65
+export AUTOCONF_VERSION=2.68
 export NEWLIB_VERSION=2.5.0
 
 # export variables

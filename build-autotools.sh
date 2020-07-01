@@ -6,7 +6,7 @@ set -e
 source vars.sh
 
 # Build autotools
-mkdir build/autotools
+mkdir -p build/autotools
 cd build/autotools
 
 ../../automake-$AUTOMAKE_VERSION/configure --prefix="$AUTOTOOLS_PREFIX"
