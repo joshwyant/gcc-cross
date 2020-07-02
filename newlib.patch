@@ -13,12 +13,13 @@ diff -ruN newlib-2.5.0/config.sub newlib-2.5.0-1/config.sub
 diff -ruN newlib-2.5.0/newlib/configure.host newlib-2.5.0-1/newlib/configure.host
 --- newlib-2.5.0/newlib/configure.host	2016-12-23 02:33:54.000000000 +0000
 +++ newlib-2.5.0-1/newlib/configure.host	2020-06-22 18:50:40.690503512 +0000
-@@ -462,6 +462,9 @@
+@@ -462,6 +462,10 @@
  	sys_dir=sysvi386
  	unix_dir=unix
  	;;
 +  {{MACHINE}}-*-{{OSNAME}}*)
 +	sys_dir={{OSNAME}}
++	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED"
 +	;;
    i[34567]86-pc-linux-*)
  	sys_dir=linux
