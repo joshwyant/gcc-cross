@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #define SYSCALL_EXIT    0
 #define SYSCALL_CLOSE   1
@@ -45,9 +46,6 @@ struct MYOS_STAT
     unsigned st_mode;
     // TODO
 };
-
-#undef errno
-extern int errno;
 
 __attribute__((noreturn))
 void _exit(int exit_code)
@@ -208,11 +206,11 @@ int read(int file, char *ptr, int len)
 // Increase program data space.
 caddr_t sbrk(int incr)
 {
-    extern char end;		/* Defined by the linker */
+    extern char _end;		/* Defined by the linker */
     static char *heap_end;
     char *prev_heap_end;
     if (heap_end == 0) {
-        heap_end = &end;
+        heap_end = &_end;
     }
     asm volatile("int $0x80"
         :: "a"(SYSCALL_SBRK),"b"(heap_end),"c"(incr));

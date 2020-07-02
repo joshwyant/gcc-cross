@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Based on: https://wiki.osdev.org/Porting_Newlib
 

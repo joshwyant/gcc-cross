@@ -13,16 +13,16 @@ diff -ruN newlib-2.5.0/config.sub newlib-2.5.0-1/config.sub
 diff -ruN newlib-2.5.0/newlib/configure.host newlib-2.5.0-1/newlib/configure.host
 --- newlib-2.5.0/newlib/configure.host	2016-12-23 02:33:54.000000000 +0000
 +++ newlib-2.5.0-1/newlib/configure.host	2020-06-22 18:50:40.690503512 +0000
-@@ -240,6 +240,9 @@
-   mt*)
- 	machine_dir=mt
+@@ -462,6 +462,9 @@
+ 	sys_dir=sysvi386
+ 	unix_dir=unix
  	;;
 +  {{MACHINE}}-*-{{OSNAME}}*)
 +	sys_dir={{OSNAME}}
 +	;;
-   nds32*)
- 	machine_dir=nds32
- 	libm_machine_dir=nds32
+   i[34567]86-pc-linux-*)
+ 	sys_dir=linux
+ 	unix_dir=unix
 diff -ruN newlib-2.5.0/newlib/libc/sys/configure.in newlib-2.5.0-1/newlib/libc/sys/configure.in
 --- newlib-2.5.0/newlib/libc/sys/configure.in	2016-12-23 02:33:54.000000000 +0000
 +++ newlib-2.5.0-1/newlib/libc/sys/configure.in	2020-06-22 18:51:18.559026067 +0000
