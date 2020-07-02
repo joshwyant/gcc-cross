@@ -37,11 +37,11 @@ diff -ruN gcc-10.1.0/gcc/config/{{OSNAME}}.h gcc-10.1.0-1/gcc/config/{{OSNAME}}.
 +/* Files that are linked before user code.
 +   The %s tells GCC to look for these files in the library directory. */
 +#undef STARTFILE_SPEC
-+#define STARTFILE_SPEC "crti.o%s crtbegin.o%s"
++#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
 + 
 +/* Files that are linked after user code. */
 +#undef ENDFILE_SPEC
-+#define ENDFILE_SPEC "crt0.o%s crtend.o%s crtn.o%s"
++#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
 + 
 +/* Additional predefined macros. */
 +#undef TARGET_OS_CPP_BUILTINS

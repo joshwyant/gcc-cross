@@ -65,7 +65,7 @@ int close(int file)
     asm volatile("int $0x80":"=a"(retval):"a"(SYSCALL_CLOSE),"d"(file));
     return retval;
 }
-char **environ; /* pointer to array of char * strings that define the current environment variables */
+extern char **environ; /* pointer to array of char * strings that define the current environment variables */
 
 // Transfer control to a new process.
 int execve(char *name, char **argv, char **env)
