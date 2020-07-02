@@ -33,6 +33,10 @@ void _start()
         asm volatile("int $0x80"::"a"(4),"d"(i),"b"(str)); // Copy environ[i]
     }
 
+    // Call global constructors
+    extern void _init ();
+    _init();
+
     // Call main()
     int ret_val = main(argc, argv);
 
