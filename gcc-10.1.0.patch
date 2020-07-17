@@ -71,7 +71,7 @@ diff -ruN gcc-10.1.0/gcc/config.gcc gcc-10.1.0-1/gcc/config.gcc
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
 +  use_gcc_stdint=wrap
-+  native_system_header_dir"/usr/local/cross/${cpu_type}-{{OSNAME}}/include"
++  native_system_header_dir="/usr/local/cross/${cpu_type}-{{OSNAME}}/include"
 +  ;;
  *-*-darwin*)
    tmake_file="t-darwin "
